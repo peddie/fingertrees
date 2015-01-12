@@ -37,15 +37,15 @@ data Digit a = One a
                        Generic, Data, Typeable,
                        Functor, Foldable, Traversable)
 
-data Node v a = Node2 !v a a
-              | Node3 !v a a a
+data Node v a = Node2 v a a
+              | Node3 v a a a
               deriving (Show, Read, Eq, Ord,
                         Generic, Data, Typeable,
                         Functor, Foldable, Traversable)
 
 data FingerTree v a = Empty
                     | Single a
-                    | Deep !v !(Digit a) (FingerTree v (Node v a)) !(Digit a)
+                    | Deep v (Digit a) (FingerTree v (Node v a)) (Digit a)
                     deriving (Show, Read, Eq, Ord,
                               Generic, Data, Typeable,
                               Functor, Foldable, Traversable)
@@ -53,6 +53,7 @@ data FingerTree v a = Empty
 type Meas a v = (Measured a, Monoid v, v ~ Measure a)
 
 infixr 5 <|
+
 (<|) :: Meas a v => a -> FingerTree v a -> FingerTree v a
 lft <| Empty                      = Single lft
 lft <| Single v                   = deep' (One lft) Empty (One v)
@@ -95,19 +96,16 @@ toTreeR lst = Empty |>> lst
 nodeToDigit :: Node v a -> Digit a
 nodeToDigit (Node2 _ a b) = Two a b
 nodeToDigit (Node3 _ a b c) = Three a b c
-{-# INLINE nodeToDigit #-}
 
 deepL :: Meas a v => FingerTree v (Node v a) -> Digit a -> FingerTree v a
 deepL mid rd = case viewL mid of
   EmptyL -> toTreeR rd
   (n :< mid') -> deep' (nodeToDigit n) mid' rd
-{-# INLINE deepL #-}
 
 deepR :: Meas a v => Digit a -> FingerTree v (Node v a) -> FingerTree v a
 deepR ld mid = case viewR mid of
   EmptyR -> toTreeL ld
   (mid' :> n)   -> deep' ld mid' (nodeToDigit n)
-{-# INLINE deepR #-}
 
 data ViewL v a = EmptyL
                | a :< FingerTree v a
@@ -122,7 +120,6 @@ viewL (Deep _ (One a) mid rd) = a :< deepL mid rd
 viewL (Deep _ (Two a b) mid rd)      = a :< deep' (One b) mid rd
 viewL (Deep _ (Three a b c) mid rd)  = a :< deep' (Two b c) mid rd
 viewL (Deep _ (Four a b c d) mid rd) = a :< deep' (Three b c d) mid rd
-{-# INLINE viewL #-}
 
 data ViewR v a = EmptyR
                | FingerTree v a :> a
@@ -137,7 +134,6 @@ viewR (Deep _ ld mid (One a)) = deepR ld mid :> a
 viewR (Deep _ ld mid (Two a b))      = deep' ld mid (One a) :> b
 viewR (Deep _ ld mid (Three a b c))  = deep' ld mid (Two a b) :> c
 viewR (Deep _ ld mid (Four a b c d)) = deep' ld mid (Three a b c) :> d
-{-# INLINE viewR #-}
 
 null :: FingerTree v a -> Bool
 null Empty = True
@@ -171,15 +167,12 @@ last' = fromMaybe (error "Data.FingerTree.last': empty tree!") . last
 
 digitToList :: Digit a -> [a]
 digitToList = F.foldl' (flip (:)) []
-{-# INLINE digitToList #-}
 
 node2' :: Meas a v => a -> a -> Node v a
 node2' x y = Node2 (measure x <> measure y) x y
-{-# INLINE node2' #-}
 
 node3' :: Meas a v => a -> a -> a -> Node v a
 node3' x y z = Node3 (measure x <> measure y <> measure z) x y z
-{-# INLINE node3' #-}
 
 listToNodes :: Meas a v => [a] -> [Node v a]
 listToNodes [] = error "Data.FingerTree.listToNodes: empty argument!"
@@ -262,7 +255,6 @@ deep' :: Meas a v => Digit a -> FingerTree v (Node v a) -> Digit a
 deep' ld mid rd = Deep summ ld mid rd
   where
     summ = measure ld <> measure mid <> measure rd
-{-# INLINE deep' #-}
 
 data Split v a = Split (v a) a (v a)
                deriving (Show, Read, Eq, Ord,
