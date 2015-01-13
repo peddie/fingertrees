@@ -7,5 +7,6 @@ main = doctest [ "src/Data/FingerTree.hs"
                , "src/Data/FingerTree/Sequence.hs"
                , "src/Data/FingerTree/PriorityQueue.hs"
                , "src/Data/FingerTree/OrderedSequence.hs"
-               , "src/Data/FingerTree/IntervalTree.hs"
+               , "src/Data/FingerTree/IntervalMap.hs"
+               , "src/Data/Interval.hs"
                ]

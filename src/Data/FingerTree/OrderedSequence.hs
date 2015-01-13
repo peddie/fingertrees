@@ -67,5 +67,5 @@ merge (OSeq a') (OSeq b') = OSeq $ a' `go` b'
   where
     go as bs = case viewL bs of
       EmptyL -> as
-      (Element a) :< lst -> let (lt, gt) = split (Key a >) lst
-                            in lt <> (Element a <| go bs gt)
+      (Element a) :< lst -> let (lt, gt) = split (Key a >) as
+                            in lt <> (Element a <| go lst gt)
