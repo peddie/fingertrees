@@ -67,7 +67,6 @@ main = do
     bgroup "insertion" (
        benchN benchLS "fromFoldable" I.fromFoldable listchar 100
        <> benchN benchLS "fromFoldable" I.fromFoldable listchar 1000
-       <> benchN benchLS "fromFoldable" I.fromFoldable listchar 10000
        )
     , bgroup "intersections, 1k q" [
        bench "100 in [0, 10000]" $
